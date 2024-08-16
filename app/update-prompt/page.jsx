@@ -3,7 +3,6 @@
 import Form from "@components/Form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Suspense } from "react";
 
 const EditPrompt = () => {
   const router = useRouter();
@@ -17,16 +16,22 @@ const EditPrompt = () => {
   });
 
   useEffect(() => {
+    if (!promptId) return;
+
     const getPromptDetails = async () => {
-      const response = await fetch(`/api/prompt/${promptId}`);
-      const data = await response.json();
-      setPost({
-        prompt: data.prompt,
-        tag: data.tag,
-      });
+      try {
+        const response = await fetch(`/api/prompt/${promptId}`);
+        const data = await response.json();
+        setPost({
+          prompt: data.prompt,
+          tag: data.tag,
+        });
+      } catch (error) {
+        console.error("Failed to fetch prompt details:", error);
+      }
     };
 
-    if (promptId) getPromptDetails();
+    getPromptDetails();
   }, [promptId]);
 
   const updatePrompt = async (e) => {
@@ -55,15 +60,13 @@ const EditPrompt = () => {
   };
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <Form
-        type="Edit"
-        post={post}
-        setPost={setPost}
-        submitting={submitting}
-        handleSubmit={updatePrompt}
-      />
-    </Suspense>
+    <Form
+      type="Edit"
+      post={post}
+      setPost={setPost}
+      submitting={submitting}
+      handleSubmit={updatePrompt}
+    />
   );
 };
 
